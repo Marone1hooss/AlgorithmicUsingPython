@@ -27,27 +27,34 @@ for i in data:
 
 #prim is a function that uses prims algorithm to solve spanning tree problem
 def prims(adj,nnodes):
-
-    cost=0  #The total cost of the tree
-    visited=set() #The visited elements of the tree
-    connections={i:[] for i in range(1,int(nnodes)+1)} #the connections of the tree
-    pc=[[0,1,1]] #all the possible connections to the tree
+    #A boolean dictionary that contains even the nood is visited or not 
+    visitedb={i:False for i in range(1,int(nnodes)+1)}
+    #The total cost of the tree
+    cost=0  
+    #The visited elements of the tree
+    visited=set() 
+    #the connections of the tree
+    connections={i:[] for i in range(1,int(nnodes)+1)} 
+     #all the possible connections to the tree
+    pc=[[0,1,1]] 
+   
     heapq.heapify(pc)
    
-    while len(visited)<int(nnodes):
+    while len(visited)<nnodes and len(pc)!=0:
+#The closest element to the tree  
+        dic,start,end=heapq.heappop(pc)
 
-        dic,start,end=heapq.heappop(pc)  #The closest element to the tree
-
-
-        if end in visited:
+        if visitedb[end]:
             continue
 
         cost+=dic
         visited.add(end)
+        visitedb[end]=True
         connections[start].append(end)
+#Adding all the connections of the element to the pc if they are not already there
+        for i in adj[end]:   
+            if not visitedb[i[2]]:
 
-        for i in adj[end]:  #Adding all the connections of the element to the pc if they are not already there 
-            if i[2] not in visited:
                 heapq.heappush(pc,i) 
 
 
@@ -93,7 +100,6 @@ def kruskals(data,nnodes):
         n2=min[2]
 
         #if the two limits of the edge are visited 
-
         if visitedb[n1] and visitedb[n2]:
             #checking if they are in the same group
             if group[n1]==group[n2]:
@@ -162,5 +168,5 @@ def kruskals(data,nnodes):
 
 
 #calling the functions
-prims(adj,nnodes)
+prims(adj,int(nnodes))
 kruskals(data,int(nnodes))
