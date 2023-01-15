@@ -1,17 +1,19 @@
 #importing all the needed libraries
 import sys
 import heapq
+import networkx as nx
+import matplotlib.pyplot as plt
 #Reading the file and converting his elements into a list of integers
 data =[]
+datatest=[]
 with open(sys.argv[1]) as file:
     x=file.readline().rstrip().split()  #reading the first line
     for line in file:  #reading the rest of the file 
         start,end,cost=line.rstrip().split()
-        
-        
+        datatest.append((int(start),int(end),int(cost)))
         data.append([int(cost),int(start),int(end)])
 
-nnodes=x[0]
+nnodes=int(x[0])
 nedges=x[1]
 #adj is a dictionary that contains every element of the graph with all his possible connections
 adj={i:[] for i in range(1,int(nnodes)+1)}
@@ -86,6 +88,7 @@ def kruskals(data,nnodes):
     visitedb={i:False for i in range(1,int(nnodes)+1)}
     visited=set()
     connections={i:[] for i in range(1,int(nnodes)+1)}
+    mygraph=[]
 
     group={i:int for i in range(1,int(nnodes)+1)}
     a=1
@@ -108,6 +111,7 @@ def kruskals(data,nnodes):
             y=group[n2]
             cost+=dic
             connections[n1].append(n2)
+            mygraph.append((n1,n2,dic))
             #connecting the two groups
             for i in group:
                 if group[i]==y:
@@ -120,12 +124,14 @@ def kruskals(data,nnodes):
             visitedb[n2]=True
             connections[n1].append(n2)
             group[n2]=group[n1]
+            mygraph.append((n1,n2,dic))
         elif visitedb[n2]:
             cost+=dic
             visited.add(n1)
             visitedb[n1]=True
             connections[n2].append(n1)
             group[n1]=group[n2]
+            mygraph.append((n1,n2,dic))
 
 
         #if no one of theme is connected 
@@ -138,6 +144,7 @@ def kruskals(data,nnodes):
             group[n1]=a
             group[n2]=a
             a+=1
+            mygraph.append((n1,n2,dic))
 
             if n1<n2:
                 connections[n1].append(n2)
@@ -163,10 +170,45 @@ def kruskals(data,nnodes):
 
             print('')
 
-
+    return mygraph
 
 
 
 #calling the functions
-prims(adj,int(nnodes))
-kruskals(data,int(nnodes))
+prims(adj,nnodes)
+mygraph=kruskals(data,int(nnodes))
+
+def display(datatest,mygraph,nnodes):
+    G=nx.Graph()
+    G.add_nodes_from(range(1,nnodes))
+    for i in datatest:
+        G.add_edge(i[0],i[1],weight=i[2])
+    print(G)
+    MST=nx.minimum_spanning_tree(G)
+    plt.figure()
+    pos=nx.spring_layout(G)
+    plt.subplot(121)
+
+    nx.draw_networkx(G,pos,with_labels=True,node_size=500,node_color="yellow")
+    nx.draw_networkx_edge_labels(G,pos,edge_labels=nx.get_edge_attributes(G,"weight"))
+    
+
+    G1=nx.Graph()
+    G1.add_nodes_from(range(1,nnodes))
+    for i in mygraph:
+        G1.add_edge(i[0],i[1],weight=i[2])
+    print(G1)
+    
+    
+    plt.subplot(122)
+    pos=nx.spring_layout(G1)
+    nx.draw_networkx(G1,pos,with_labels=True,node_size=500,node_color="blue")
+    nx.draw_networkx_edge_labels(G1,pos,edge_labels=nx.get_edge_attributes(G1,"weight"))
+    plt.show()
+
+
+
+display(datatest,mygraph,nnodes)
+
+
+        
